@@ -78,7 +78,7 @@
           nixpkgs.lib.composeManyExtensions [
             (final: prev: {
               opam2json =
-                if __elem (prev.opam2json.version or null) opam2json-versions then
+                if nixpkgs.lib.elem (prev.opam2json.version or null) opam2json-versions then
                   prev.opam2json
                 else
                   (opam2json.overlay final prev).opam2json;
@@ -98,10 +98,10 @@
         lib = opam-nix;
         checks = packages // (pkgs.callPackage ./examples/docfile { inherit opam-nix; }).checks;
 
-        legacyPackages = __mapAttrs (
+        legacyPackages = nixpkgs.lib.mapAttrs (
           name: versions:
           let
-            allVersions = __listToAttrs (
+            allVersions = nixpkgs.lib.listToAttrs (
               map (
                 version:
                 nixpkgs.lib.nameValuePair version
@@ -122,7 +122,7 @@
           }
         ) (lib.listRepo opam-repository);
 
-        allChecks = pkgs.runCommand "opam-nix-checks" { checks = __attrValues checks; } "touch $out";
+        allChecks = pkgs.runCommand "opam-nix-checks" { checks = nixpkgs.lib.attrValues checks; } "touch $out";
 
         packages =
           let
