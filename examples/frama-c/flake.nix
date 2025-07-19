@@ -1,16 +1,20 @@
 # We can build GUI stuff!
 # Don't try to build it statically though
 {
+  inputs.systems.url = "github:nix-systems/default";
   inputs.opam-nix.url = "github:tweag/opam-nix";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
   outputs =
     {
       self,
+      nixpkgs,
+      systems,
       opam-nix,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      legacyPackages =
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      legacyPackages = eachSystem (system:
         let
           inherit (opam-nix.lib.${system}) queryToScope;
 
@@ -41,8 +45,10 @@
             });
           };
         in
-        scope.overrideScope overlay;
+        scope.overrideScope overlay);
 
-      packages.default = self.legacyPackages.${system}.frama-c;
-    });
+      packages = eachSystem (system: {
+        default = self.legacyPackages.${system}."0install";
+      });
+    };
 }

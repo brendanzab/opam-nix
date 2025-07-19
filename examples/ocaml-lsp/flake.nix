@@ -1,17 +1,20 @@
 {
   description = "Build an opam project with multiple packages";
-  inputs.opam-nix.url = "github:tweag/opam-nix";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:nixos/nixpkgs";
+  inputs.systems.url = "github:nix-systems/default";
+  inputs.opam-nix.url = "github:tweag/opam-nix";
   outputs =
     {
       self,
       nixpkgs,
+      systems,
       opam-nix,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      legacyPackages =
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      legacyPackages = eachSystem (system:
         let
           src = nixpkgs.legacyPackages.${system}.fetchFromGitHub {
             owner = "ocaml";
@@ -23,8 +26,10 @@
           inherit (opam-nix.lib.${system}) buildOpamProject';
           scope = buildOpamProject' { } src { ocaml-base-compiler = "*"; };
         in
-        scope;
+        scope);
 
-      packages.default = self.legacyPackages.${system}.ocaml-lsp-server;
-    });
+      packages = eachSystem (system: {
+        default = self.legacyPackages.${system}.ocaml-lsp-server;
+      });
+    };
 }

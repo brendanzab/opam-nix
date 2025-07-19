@@ -1,25 +1,31 @@
 {
   description = "Build an opam project not in the repo, using sane defaults";
+  inputs.systems.url = "github:nix-systems/default";
   inputs.opam-nix.url = "github:tweag/opam-nix";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.opam2json.url = "github:tweag/opam2json";
   outputs =
     {
       self,
+      nixpkgs,
+      systems,
       opam-nix,
       opam2json,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      legacyPackages =
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      legacyPackages = eachSystem (system:
         let
           inherit (opam-nix.lib.${system}) buildOpamProject;
           scope = buildOpamProject { } "opam2json" opam2json {
             ocaml-system = "*";
           };
         in
-        scope;
+        scope);
 
-      packages.default = self.legacyPackages.${system}.opam2json;
-    });
+      packages = eachSystem (system: {
+        default = self.legacyPackages.${system}.opam2json;
+      });
+    };
 }

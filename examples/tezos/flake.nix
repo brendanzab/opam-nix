@@ -1,22 +1,28 @@
 {
   description = "Big, girthy package with a lot of dependencies";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.systems.url = "github:nix-systems/default";
   outputs =
     {
       self,
+      nixpkgs,
+      systems,
       opam-nix,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      legacyPackages =
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      legacyPackages = eachSystem (system:
         let
           inherit (opam-nix.lib.${system}) queryToScope;
 
           scope = queryToScope { } { tezos = "*"; };
           overlay = self: super: { };
         in
-        scope.overrideScope overlay;
+        scope.overrideScope overlay);
 
-      packages.default = self.legacyPackages.${system}.tezos;
-    });
+      packages = eachSystem (system: {
+        default = self.legacyPackages.${system}.tezos;
+      });
+    };
 }

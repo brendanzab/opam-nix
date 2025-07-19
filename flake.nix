@@ -40,6 +40,7 @@
     {
       self,
       nixpkgs,
+      systems,
       flake-utils,
       opam2json,
       opam-repository,
@@ -129,47 +130,47 @@
               _0install = (import ./examples/0install/flake.nix).outputs {
                 self = _0install;
                 opam-nix = inputs.self;
-                inherit (inputs) flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
               rocq = (import ./examples/rocq/flake.nix).outputs {
                 self = rocq;
                 opam-nix = inputs.self;
-                inherit (inputs) nixpkgs opam-repository flake-utils;
+                inherit (inputs) nixpkgs systems opam-repository;
               };
               frama-c = (import ./examples/frama-c/flake.nix).outputs {
                 self = frama-c;
                 opam-nix = inputs.self;
-                inherit (inputs) flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
               opam-ed = (import ./examples/opam-ed/flake.nix).outputs {
                 self = opam-ed;
                 opam-nix = inputs.self;
-                inherit (inputs) flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
               opam2json = (import ./examples/opam2json/flake.nix).outputs {
                 self = opam2json;
                 opam-nix = inputs.self;
-                inherit (inputs) opam2json flake-utils;
+                inherit (inputs) nixpkgs systems opam2json;
               };
               ocaml-lsp = (import ./examples/ocaml-lsp/flake.nix).outputs {
                 self = ocaml-lsp;
                 opam-nix = inputs.self;
-                inherit (inputs) nixpkgs flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
               opam2json-static = (import ./examples/opam2json-static/flake.nix).outputs {
                 self = opam2json-static;
                 opam-nix = inputs.self;
-                inherit (inputs) opam2json flake-utils;
+                inherit (inputs) nixpkgs systems opam2json;
               };
               tezos = (import ./examples/tezos/flake.nix).outputs {
                 self = tezos;
                 opam-nix = inputs.self;
-                inherit (inputs) flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
               materialized-opam-ed = (import ./examples/materialized-opam-ed/flake.nix).outputs {
                 self = materialized-opam-ed;
                 opam-nix = inputs.self;
-                inherit (inputs) flake-utils;
+                inherit (inputs) nixpkgs systems;
               };
             };
           in

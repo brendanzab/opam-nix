@@ -1,17 +1,21 @@
 # Static build using the compiler from OPAM
 {
+  inputs.systems.url = "github:nix-systems/default";
   inputs.opam-nix.url = "github:tweag/opam-nix";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.opam2json.url = "github:tweag/opam2json";
   outputs =
     {
       self,
+      nixpkgs,
+      systems,
       opam-nix,
       opam2json,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      legacyPackages =
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      legacyPackages = eachSystem (system:
         let
           inherit (opam-nix.lib.${system}) buildOpamProject;
           pkgs = opam-nix.inputs.nixpkgs.legacyPackages.${system};
@@ -26,8 +30,10 @@
             });
           };
         in
-        scope.overrideScope overlay;
+        scope.overrideScope overlay);
 
-      packages.default = self.legacyPackages.${system}.opam2json;
-    });
+      packages = eachSystem (system: {
+        default = self.legacyPackages.${system}.opam2json;
+      });
+    };
 }
